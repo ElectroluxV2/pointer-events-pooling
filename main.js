@@ -14,7 +14,7 @@ function drawDot(x, y, radius = 5, color = 'white') {
 }
 
 let last = performance.now();
-window.onpointermove = ev => {
+window.onpointerrawupdate = ev => {
   const now = performance.now();
   console.log(now - last);
   last = now;
