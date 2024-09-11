@@ -5,6 +5,7 @@ on:
     - main
 jobs:
   build-deploy:
+    name: Build & Deploy
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
