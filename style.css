@@ -1,6 +1,7 @@
 :root {
   color-scheme: dark;
   pointer-events: none;
+  touch-action: none;
 }
 
 canvas {
