@@ -1,0 +1,11 @@
+:root {
+  color-scheme: dark;
+  pointer-events: none;
+}
+
+canvas {
+  width: 100svw;
+  height: 100svh;
+  position: absolute;
+  inset: 0;
+}
