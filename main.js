@@ -25,14 +25,17 @@ function drawLine(x1, y1, x2, y2, color = 'white') {
 let last = performance.now();
 let x1 = [], y1 = [];
 window.onpointermove = ev => {
-  const now = performance.now();
-  console.log(now - last);
-  last = now;
+  const events = [...ev.getCoalescedEvents(), ...ev.getPredictedEvents()];
+  for (let coalescedEvent of events) {
+    const now = performance.now();
+    console.log(now - last);
+    last = now;
 
-  drawDot(ev.x, ev.y);
+    drawDot(coalescedEvent.x, coalescedEvent.y);
 
-  x1[ev.pointerId] && drawLine(x1[ev.pointerId], y1[ev.pointerId], ev.x, ev.y);
+    x1[coalescedEvent.pointerId] && drawLine(x1[coalescedEvent.pointerId], y1[coalescedEvent.pointerId], coalescedEvent.x, coalescedEvent.y);
 
-  x1[ev.pointerId] = ev.x;
-  y1[ev.pointerId] = ev.y;
+    x1[coalescedEvent.pointerId] = coalescedEvent.x;
+    y1[coalescedEvent.pointerId] = coalescedEvent.y;
+  }
 }
