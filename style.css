@@ -2,6 +2,7 @@
   color-scheme: dark;
   pointer-events: none;
   touch-action: none;
+  cursor: none;
 }
 
 canvas {

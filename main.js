@@ -3,10 +3,15 @@ const canvas = window.canvas;
 canvas.width = window.innerWidth * window.devicePixelRatio;
 canvas.height = window.innerHeight * window.devicePixelRatio;
 
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', {
+  alpha: false,
+  desynchronized: true,
+  willreadfrequently: true,
+});
+
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-function drawDot(x, y, radius = 1, color = 'white') {
+function drawDot(x, y, radius = 10, color = 'white') {
   ctx.beginPath(); // Start a new path
   ctx.arc(x, y, radius, 0, Math.PI * 2);
   ctx.fillStyle = color;
@@ -23,14 +28,25 @@ function drawLine(x1, y1, x2, y2, color = 'white') {
 }
 
 const /** @type PointerEvent[] */ events = [];
+const /** @type PointerEvent[] */ predictions = [];
 window.onpointermove = ev => {
   events.push(...ev.getCoalescedEvents());
+  const pred = ev.getPredictedEvents();
+  pred.length && predictions.push(ev.getPredictedEvents()[0]);
+  // console.log(ev.getPredictedEvents())
 }
 
 function draw() {
-  while (events.length) {
-   const ev =  events.pop();
+  events.length && ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (!predictions.length && events.length) {
+    const ev =  events.pop();
     drawDot(ev.x, ev.y);
+    events.length = 0;
+  } else if (predictions.length) {
+    const ev =  predictions.pop();
+    drawDot(ev.x, ev.y, 10, "red");
+    predictions.length = 0;
   }
 
   requestAnimationFrame(draw);
