@@ -22,20 +22,18 @@ function drawLine(x1, y1, x2, y2, color = 'white') {
   ctx.stroke();
 }
 
-let last = performance.now();
-let x1 = [], y1 = [];
+const /** @type PointerEvent[] */ events = [];
 window.onpointermove = ev => {
-  const events = [...ev.getCoalescedEvents(), ...ev.getPredictedEvents()];
-  for (let coalescedEvent of events) {
-    const now = performance.now();
-    console.log(now - last);
-    last = now;
-
-    drawDot(coalescedEvent.x, coalescedEvent.y);
-
-    x1[coalescedEvent.pointerId] && drawLine(x1[coalescedEvent.pointerId], y1[coalescedEvent.pointerId], coalescedEvent.x, coalescedEvent.y);
-
-    x1[coalescedEvent.pointerId] = coalescedEvent.x;
-    y1[coalescedEvent.pointerId] = coalescedEvent.y;
-  }
+  events.push(...ev.getCoalescedEvents());
 }
+
+function draw() {
+  while (events.length) {
+   const ev =  events.pop();
+    drawDot(ev.x, ev.y);
+  }
+
+  requestAnimationFrame(draw);
+}
+
+draw();
