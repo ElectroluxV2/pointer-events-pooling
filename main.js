@@ -6,7 +6,6 @@ canvas.height = window.innerHeight * window.devicePixelRatio;
 const ctx = canvas.getContext('2d', {
   alpha: false,
   desynchronized: true,
-  willreadfrequently: true,
 });
 
 ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
@@ -32,7 +31,7 @@ const /** @type PointerEvent[] */ predictions = [];
 window.onpointermove = ev => {
   events.push(...ev.getCoalescedEvents());
   const pred = ev.getPredictedEvents();
-  pred.length && predictions.push(ev.getPredictedEvents()[0]);
+  pred.length && predictions.push(...ev.getPredictedEvents());
   // console.log(ev.getPredictedEvents())
 }
 
