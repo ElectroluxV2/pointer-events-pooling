@@ -44,9 +44,10 @@ function draw() {
     drawDot(ev.x, ev.y);
     events.length = 0;
   } else if (predictions.length) {
-    const ev =  predictions.pop();
-    drawDot(ev.x, ev.y, 10, "red");
-    predictions.length = 0;
+    while (predictions.length) {
+      const ev =  predictions.pop();
+      drawDot(ev.x, ev.y, 10, "red");
+    }
   }
 
   requestAnimationFrame(draw);
