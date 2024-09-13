@@ -26,27 +26,59 @@ function drawLine(x1, y1, x2, y2, color = 'white') {
   ctx.stroke();
 }
 
-const /** @type PointerEvent[] */ events = [];
-const /** @type PointerEvent[] */ predictions = [];
-window.onpointermove = ev => {
-  events.push(...ev.getCoalescedEvents());
-  const pred = ev.getPredictedEvents();
-  pred.length && predictions.push(...ev.getPredictedEvents());
-  // console.log(ev.getPredictedEvents())
+const /** @type {Map<PointerEvent["pointerId"],PointerEvent[]>} */ pointerCoalescedEventsByPointer = new Map();
+const /** @type {Map<PointerEvent["pointerId"],PointerEvent[]>} */ pointerPredictedEventsByPointer = new Map();
+window.onpointermove = pointerEvent => {
+  const { pointerId } = pointerEvent;
+
+  !pointerCoalescedEventsByPointer.has(pointerId) && pointerCoalescedEventsByPointer.set(pointerId, []);
+  !pointerPredictedEventsByPointer.has(pointerId) && pointerPredictedEventsByPointer.set(pointerId, []);
+
+  pointerCoalescedEventsByPointer.set(pointerId, pointerCoalescedEventsByPointer.get(pointerId).concat(pointerEvent.getCoalescedEvents()));
+  pointerPredictedEventsByPointer.set(pointerId, pointerPredictedEventsByPointer.get(pointerId).concat(pointerEvent.getPredictedEvents()));
 }
 
 function draw() {
-  events.length && ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'white';
 
-  if (!predictions.length && events.length) {
-    const ev =  events.pop();
-    drawDot(ev.x, ev.y);
-    events.length = 0;
-  } else if (predictions.length) {
-    while (predictions.length) {
-      const ev =  predictions.pop();
-      drawDot(ev.x, ev.y, 10, "red");
+  for (const pointerId of pointerCoalescedEventsByPointer.keys()) {
+    const coalescedEvents = pointerCoalescedEventsByPointer.get(pointerId);
+
+    // At least 2 points to draw line
+    if (coalescedEvents.length < 2) continue;
+
+    const first = coalescedEvents.at(0);
+    const last = coalescedEvents.at(-1);
+
+    ctx.beginPath();
+    ctx.moveTo(first.x, first.y);
+
+    // Points between start and stop
+    for (let i = 1; i < coalescedEvents.length - 1; i++) {
+      ctx.lineTo(coalescedEvents[i].x, coalescedEvents[i].y);
     }
+
+    ctx.lineTo(last.x, last.y);
+
+
+    const predictedEvents = pointerPredictedEventsByPointer.get(pointerId);
+
+    // At least 1 predicted point to draw prediction
+    if (predictedEvents.length < 1) {
+      ctx.stroke();
+      continue;
+    }
+
+    for (const predictedEvent of predictedEvents) {
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(predictedEvent.x, predictedEvent.y);
+    }
+
+    ctx.stroke();
+    // Clean predictions
+    pointerPredictedEventsByPointer.set(pointerId, []);
   }
 
   requestAnimationFrame(draw);
